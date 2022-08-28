@@ -2,8 +2,7 @@
   "repository": "#",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "webpack --config ./bundler/webpack.prod.js",
-    "dev": "webpack serve --config ./bundler/webpack.dev.js",
+    "dev": "npx http-server .",
     "proxy": "npx spandx -c spandx.config.cjs"
   },
   "dependencies": {

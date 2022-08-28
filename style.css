@@ -10,8 +10,7 @@ body
     overflow: hidden;
 }
 
-.webgl
-{
+rh-concept-car {
     position: fixed;
     top: 0;
     left: 0;
