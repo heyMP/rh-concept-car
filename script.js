@@ -76,19 +76,18 @@ const conceptCarInit = (canvas) => {
   floor.rotation.x = - Math.PI * 0.5
   // scene.add(floor)
 
-  window.addEventListener('resize', () =>
-  {
-      // Update sizes
-      sizes.width = window.innerWidth
-      sizes.height = window.innerHeight
+  window.addEventListener('resize', () => {
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
 
-      // Update camera
-      camera.aspect = sizes.width / sizes.height
-      camera.updateProjectionMatrix()
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
 
-      // Update renderer
-      renderer.setSize(sizes.width, sizes.height)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   })
 
   /**
@@ -101,12 +100,22 @@ const conceptCarInit = (canvas) => {
 
   // Controls
   const controls = new OrbitControls(camera, canvas)
-  controls.enabled = false;
+  controls.enabled = true;
   controls.target.set(0, 0, 0);
   controls.enableDamping = true
   controls.enableZoom = false;
-  controls.enablePan = false;
-  controls.enableRotate = false;
+  controls.enablePan = true;
+  controls.panSpeed = .05;
+  controls.enableRotate = true;
+  controls.autoRotateSpeed = .5;
+  controls.autoRotate = true;
+  controls.maxDistance = 2;
+  controls.minDistance = 1;
+  controls.minPolarAngle = Math.PI / 3.5;
+  controls.maxPolarAngle = Math.PI / 2.1;
+  // controls.minAzimuthAngle = Math.PI / 4;
+  // controls.maxAzimuthAngle = Math.PI / 1.5;
+
 
   /**
    * Animate
@@ -115,29 +124,46 @@ const conceptCarInit = (canvas) => {
   let previousTime = 0
 
   document.addEventListener('mousemove', onDocumentMouseMove );
+  document.addEventListener('mouseout', onDocumentMouseOut );
 
   let mouseX = 0;
   let mouseY = 0;
+  let mouseXNormalized = 0;
+  let mouseYNormalized = 0;
+
+  const options = {
+    autoRotateDampening: .001,
+  }
 
   function onDocumentMouseMove(event) {
-    mouseX = ( event.clientX - sizes.width / 2 ) / 100;
-    mouseY = ( event.clientY - sizes.height / 2 ) / 100;
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    mouseXNormalized = ( mouseX - sizes.width / 2 );
+    mouseYNormalized = ( mouseY - sizes.height / 2 );
+  }
+
+  function onDocumentMouseOut(event) {
+    mouseX = 0;
+    controls.autoRotateSpeed = .5;
   }
 
   const tick = () => {
-      const elapsedTime = clock.getElapsedTime()
-      const deltaTime = elapsedTime - previousTime
-      previousTime = elapsedTime
+    const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
 
+    controls.autoRotateSpeed = mouseXNormalized * options.autoRotateDampening;
+    // camera.position.y += mouseYNormalized * 0.000005;
+    // camera.position.z += mouseYNormalized * -0.000005;
 
-      // Update controls
-      controls.update()
+    // Update controls
+    controls.update()
 
-      // Render
-      renderer.render(scene, camera)
+    // Render
+    renderer.render(scene, camera)
 
-      // Call tick again on the next frame
-      window.requestAnimationFrame(tick)
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
   }
 
   class Movie {
@@ -179,23 +205,18 @@ const conceptCarInit = (canvas) => {
     update() {
       switch(this.scene) {
         case 'intro':
-          const tl = gsap.timeline();
-          tl
-            .to(camera.position, {
-              x: 2,
-              y: 1,
-              z: 0,
-              duration: 5,
-              ease: 'power1.in',
-              onended: () => {
-                controls.enabled = true
-              }
-            })
-          controls.enableRotate = true;
-          controls.autoRotateSpeed = .5;
-          controls.autoRotate = true;
-          controls.maxDistance = 2;
-          controls.minDistance = 1;
+          // const tl = gsap.timeline();
+          // tl
+          //   .to(camera.position, {
+          //     x: 2,
+          //     y: 1,
+          //     z: 0,
+          //     duration: 5,
+          //     ease: 'power1.in',
+          //     onended: () => {
+          //       controls.enabled = true
+          //     }
+          //   })
         break;
       }
     }
