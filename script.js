@@ -173,9 +173,11 @@ const conceptCarInit = (canvas) => {
       this.scenes = ['intro', 'overhead', 'inside'];
       this.init();
       this._initialized = false;
+      this._activeTL;
     }
 
     init() {
+      // load model
       gltfLoader.load('./models/Car/gltf-heavy-compression/scene.gltf', (gltf) => {
         gltf.scene.scale.set(0.005, 0.005, 0.005);
         scene.add(gltf.scene);
@@ -185,9 +187,17 @@ const conceptCarInit = (canvas) => {
       });
     }
 
-    nextScene() {
-      console.log('nextscene')
-      if (!this.scene) {
+    nextScene(scene = null) {
+      // if the user specified the
+      if (scene) {
+        if (this.scenes.includes(scene)) {
+          this.scene = scene;
+        }
+        else {
+          this.console.warn('There is no scene with that name available.')
+        }
+      }
+      else if (!this.scene) {
         this.scene = 'intro';
       }
       else {
@@ -206,15 +216,16 @@ const conceptCarInit = (canvas) => {
     }
 
     update() {
-      console.log(camera)
+      this._activeTL?.kill();
+
       if (this.scene === 'intro') {
-        const tl = gsap.timeline();
-        tl
+        this._activeTL = gsap.timeline();
+        this._activeTL
           .to(camera.position, {
             x: 2,
             y: 1,
             z: 0,
-            duration: 5,
+            duration: 4,
             ease: 'power2.out',
             onended: () => {
               controls.autoRotate = true
@@ -223,11 +234,11 @@ const conceptCarInit = (canvas) => {
       }
       else if (this.scene === 'overhead') {
         controls.autoRotate = false
-        const tl = gsap.timeline();
-        tl
+        this._activeTL = gsap.timeline();
+        this._activeTL 
           .to(camera.position, {
-            x: 0.2,
-            y: 3,
+            x: 0.1,
+            y: 2 + ((1 / sizes.width) * 1000),
             z: 0,
             duration: 2,
             ease: 'power2.out',
@@ -274,13 +285,14 @@ class RhConceptCar extends LitElement {
       <div part="base">
         <canvas part="canvas"></canvas>
         <div part="overhead section">
+          <button @click=${this._changeScene.bind(this)} data-scene="intro">intro</button>
           <button @click=${this._changeScene.bind(this)} data-scene="overhead">overhead</button>
         </div>
       </div>`
   }
 
   _changeScene(e) {
-    this._instance.movie.nextScene();
+    this._instance.movie.nextScene(e.target?.dataset?.scene);
   }
 }
 
