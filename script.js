@@ -97,22 +97,23 @@ const conceptCarInit = (canvas) => {
   const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.01, 100)
   camera.position.set(2, 2, 2)
   scene.add(camera)
+  window.camera = camera;
 
   // Controls
   const controls = new OrbitControls(camera, canvas)
-  controls.enabled = true;
-  controls.target.set(0, 0, 0);
-  controls.enableDamping = true
-  controls.enableZoom = false;
-  controls.enablePan = true;
-  controls.panSpeed = .05;
-  controls.enableRotate = true;
-  controls.autoRotateSpeed = .5;
-  controls.autoRotate = true;
-  controls.maxDistance = 2;
-  controls.minDistance = 1;
-  controls.minPolarAngle = Math.PI / 3.5;
-  controls.maxPolarAngle = Math.PI / 2.1;
+  controls.enabled = false;
+  // controls.target.set(0, 0, 0);
+  // controls.enableDamping = true
+  // controls.enableZoom = false;
+  // controls.enablePan = true;
+  // controls.panSpeed = .05;
+  // controls.enableRotate = true;
+  // controls.autoRotateSpeed = .5;
+  // controls.autoRotate = true;
+  // controls.maxDistance = 2;
+  // controls.minDistance = 1;
+  // controls.minPolarAngle = Math.PI / 3.5;
+  // controls.maxPolarAngle = Math.PI / 2.1;
   // controls.minAzimuthAngle = Math.PI / 4;
   // controls.maxAzimuthAngle = Math.PI / 1.5;
 
@@ -185,6 +186,7 @@ const conceptCarInit = (canvas) => {
     }
 
     nextScene() {
+      console.log('nextscene')
       if (!this.scene) {
         this.scene = 'intro';
       }
@@ -193,6 +195,7 @@ const conceptCarInit = (canvas) => {
         const nextIndex = this.scenes.findIndex(i => i === this.scene) + 1;
         if (this.scenes.length > nextIndex) {
           this.scene = this.scenes[nextIndex];
+          console.log(this.scene);
         }
         // if not, go to the begining
         else {
@@ -203,21 +206,35 @@ const conceptCarInit = (canvas) => {
     }
 
     update() {
-      switch(this.scene) {
-        case 'intro':
-          // const tl = gsap.timeline();
-          // tl
-          //   .to(camera.position, {
-          //     x: 2,
-          //     y: 1,
-          //     z: 0,
-          //     duration: 5,
-          //     ease: 'power1.in',
-          //     onended: () => {
-          //       controls.enabled = true
-          //     }
-          //   })
-        break;
+      console.log(camera)
+      if (this.scene === 'intro') {
+        const tl = gsap.timeline();
+        tl
+          .to(camera.position, {
+            x: 2,
+            y: 1,
+            z: 0,
+            duration: 5,
+            ease: 'power2.out',
+            onended: () => {
+              controls.autoRotate = true
+            }
+          })
+      }
+      else if (this.scene === 'overhead') {
+        controls.autoRotate = false
+        const tl = gsap.timeline();
+        tl
+          .to(camera.position, {
+            x: 0.2,
+            y: 3,
+            z: 0,
+            duration: 2,
+            ease: 'power2.out',
+            onended: () => {
+              controls.autoRotate = false
+            },
+          })
       }
     }
   }
@@ -231,6 +248,15 @@ const conceptCarInit = (canvas) => {
 
 class RhConceptCar extends LitElement {
   static styles = css`
+    [part=base] {
+      display: block;
+      position: relative;
+    }
+
+    [part*=section] {
+      position: absolute;
+      top: 0;
+    }
   `;
 
   constructor() {
@@ -244,7 +270,17 @@ class RhConceptCar extends LitElement {
   }
 
   render() {
-    return html`<canvas></canvas>`
+    return html`
+      <div part="base">
+        <canvas part="canvas"></canvas>
+        <div part="overhead section">
+          <button @click=${this._changeScene.bind(this)} data-scene="overhead">overhead</button>
+        </div>
+      </div>`
+  }
+
+  _changeScene(e) {
+    this._instance.movie.nextScene();
   }
 }
 
