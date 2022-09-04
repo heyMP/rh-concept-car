@@ -62,6 +62,34 @@ const conceptCarInit = (canvas) => {
   gltfLoader.setDRACOLoader(dracoLoader);
 
   /**
+   * Radar
+   */
+  const radarParams = {
+    color: 0x28cc51,
+    scale: 2
+  };
+  const radar = new THREE.Mesh(
+    new THREE.CircleGeometry(1, 50),
+    new THREE.MeshBasicMaterial({
+      color: radarParams.color,
+      wireframe: false
+    })
+  );
+  radar.visible = false
+  radar.rotation.x = Math.PI * -0.5;
+  radar.scale.set(radarParams.scale, radarParams.scale, radarParams.scale);
+  const radarFolder = gui.addFolder('Radar')
+  radarFolder.add(radar, 'visible');
+  radarFolder.add(radar.material, 'wireframe');
+  radarFolder.addColor(radarParams, 'color').onChange(() => {
+    radar.material.color.set(radarParams.color)
+  });
+  radarFolder.add(radarParams, 'scale').min(0).max(10).onChange(() => {
+    radar.scale.set(radarParams.scale, radarParams.scale, radarParams.scale);
+  });
+  scene.add(radar);
+
+  /**
    * Floor
    */
   const floor = new THREE.Mesh(
@@ -101,7 +129,7 @@ const conceptCarInit = (canvas) => {
 
   // Controls
   const controls = new OrbitControls(camera, canvas)
-  controls.enabled = false;
+  // controls.enabled = false;
   // controls.target.set(0, 0, 0);
   // controls.enableDamping = true
   // controls.enableZoom = false;
@@ -178,13 +206,19 @@ const conceptCarInit = (canvas) => {
 
     init() {
       // load model
-      gltfLoader.load('./models/Car/gltf-heavy-compression/scene.gltf', (gltf) => {
-        gltf.scene.scale.set(0.005, 0.005, 0.005);
-        scene.add(gltf.scene);
-        updateAllMaterials();
+      if (true) {
+        gltfLoader.load('./models/Car/gltf-heavy-compression/scene.gltf', (gltf) => {
+          gltf.scene.scale.set(0.005, 0.005, 0.005);
+          scene.add(gltf.scene);
+          updateAllMaterials();
+          this._initialized = true;
+          this.nextScene();
+        });
+      }
+      else {
         this._initialized = true;
-        this.nextScene();
-      });
+        this.nextScene('intro');
+      }
     }
 
     nextScene(scene = null) {
@@ -244,6 +278,7 @@ const conceptCarInit = (canvas) => {
             ease: 'power2.out',
             onended: () => {
               controls.autoRotate = false
+              radar.visible = true
             },
           })
       }
